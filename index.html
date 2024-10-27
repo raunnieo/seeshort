@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pathfinding Visualizer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Indie+Flower&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Pathfinding Visualizer</h1>
+
+      <div class="game-container">
+        <div class="board-container">
+          <div class="grid-size-control"></div>
+
+          <div id="grid"></div>
+
+          <div class="board-controls">
+            <div class="control-group algorithm-buttons">
+              <button class="active" data-algorithm="dijkstra">Dijkstra</button>
+              <button data-algorithm="astar">A*</button>
+              <button data-algorithm="bfs">BFS</button>
+              <button data-algorithm="dfs">DFS</button>
+            </div>
+
+            <div class="control-group">
+              <label>Speed:</label>
+              <input
+                type="range"
+                id="speedControl"
+                min="1"
+                max="100"
+                value="50"
+              />
+            </div>
+
+            <button id="solveButton">Solve</button>
+            <button id="resetButton">Reset</button>
+            <button id="themeButton">Theme</button>
+            <button id="mazeButton">Generate Maze</button>
+          </div>
+        </div>
+
+        <div class="metrics-panel">
+          <h3>Performance Metrics</h3>
+          <p>Visited Nodes: <span id="visitedCount">0</span></p>
+          <p>Path Length: <span id="pathLength">0</span></p>
+          <p>Time: <span id="time">0</span> ms</p>
+        </div>
+
+        <div class="config-controls">
+          <button id="saveButton">Save</button>
+          <button id="loadButton">Load</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
