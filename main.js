@@ -14,6 +14,12 @@ class PathfindingVisualizer {
     this.cols = 20;
     this.weights = new Map();
     this.savedConfigs = new Map();
+    this.isMouseDown = false;
+    this.isStartDrag = false;
+    this.isEndDrag = false;
+    this.isErasing = false;
+    this.lastClickTime = 0;
+    this.clickDelay = 300;
   }
 
   initialize() {
@@ -27,8 +33,8 @@ class PathfindingVisualizer {
     const gridElement = document.getElementById("grid");
     if (!gridElement) return;
 
-    const maxGridSize = 800;
-    const minCellSize = 15;
+    const maxGridSize = 500;
+    const minCellSize = 22;
     const cellSize = Math.max(
       minCellSize,
       Math.min(
@@ -40,8 +46,8 @@ class PathfindingVisualizer {
     const totalWidth = cellSize * this.cols;
     const totalHeight = cellSize * this.rows;
 
-    gridElement.style.width = `${totalWidth}px`;
-    gridElement.style.height = `${totalHeight}px`;
+    // gridElement.style.width = ${totalWidth}px;
+    // gridElement.style.height = ${totalHeight}px;
     gridElement.style.gridTemplateColumns = `repeat(${this.cols}, ${cellSize}px)`;
     gridElement.style.gridTemplateRows = `repeat(${this.rows}, ${cellSize}px)`;
   }
@@ -97,9 +103,14 @@ class PathfindingVisualizer {
   createGrid() {
     const gridElement = document.getElementById("grid");
     if (!gridElement) return;
-
     gridElement.innerHTML = "";
     this.grid = [];
+
+    gridElement.addEventListener("mouseleave", () => {
+      this.isMouseDown = false;
+      this.isDrawingWalls = false;
+      this.isErasing = false;
+    });
 
     for (let i = 0; i < this.rows; i++) {
       const row = [];
@@ -109,56 +120,49 @@ class PathfindingVisualizer {
         cell.dataset.row = i;
         cell.dataset.col = j;
 
-        // Mouse events for wall drawing
-        let isMouseDown = false;
-        let isStartDrag = false;
-        let isEndDrag = false;
+        // Handle click events for start/end points and wall drawing
+        cell.addEventListener("click", (e) => {
+          if (this.isRunning) return;
+          const currentTime = new Date().getTime();
+          const timeDiff = currentTime - this.lastClickTime;
+
+          if (timeDiff < this.clickDelay) {
+            // Double click detected
+            this.handleWeightAssignment(cell);
+          } else {
+            // Single click - handle normal cell click
+            this.handleCellClick(e);
+          }
+          this.lastClickTime = currentTime;
+        });
 
         cell.addEventListener("mousedown", (e) => {
           e.preventDefault();
-          isMouseDown = true;
-          if (cell === this.startCell) {
-            isStartDrag = true;
-          } else if (cell === this.endCell) {
-            isEndDrag = true;
-          } else {
-            this.handleCellClick(e);
+          if (!this.startCell || !this.endCell) return;
+
+          this.isMouseDown = true;
+          this.isDrawingWalls = true;
+
+          // Determine if we're erasing or drawing based on initial cell state
+          if (
+            !cell.classList.contains("start") &&
+            !cell.classList.contains("end")
+          ) {
+            this.isErasing = cell.classList.contains("wall");
+            this.handleWallDrawing(cell);
           }
         });
 
         cell.addEventListener("mouseover", (e) => {
-          if (!isMouseDown) return;
-          if (isStartDrag || isEndDrag) {
-            const target = e.target;
-            if (
-              !target.classList.contains("wall") &&
-              !target.classList.contains("end") &&
-              !target.classList.contains("start")
-            ) {
-              if (isStartDrag) {
-                this.startCell.classList.remove("start");
-                target.classList.add("start");
-                this.startCell = target;
-              } else {
-                this.endCell.classList.remove("end");
-                target.classList.add("end");
-                this.endCell = target;
-              }
-            }
-          } else {
-            this.handleCellClick(e);
+          if (this.isMouseDown && this.isDrawingWalls) {
+            this.handleWallDrawing(e.target);
           }
         });
 
         cell.addEventListener("mouseup", () => {
-          isMouseDown = false;
-          isStartDrag = false;
-          isEndDrag = false;
-        });
-
-        cell.addEventListener("contextmenu", (e) => {
-          e.preventDefault();
-          this.handleWeightAssignment(cell);
+          this.isMouseDown = false;
+          this.isDrawingWalls = false;
+          this.isErasing = false;
         });
 
         gridElement.appendChild(cell);
@@ -167,12 +171,72 @@ class PathfindingVisualizer {
       this.grid.push(row);
     }
 
-    // Add global mouseup event
     document.addEventListener("mouseup", () => {
-      isMouseDown = false;
-      isStartDrag = false;
-      isEndDrag = false;
+      this.isMouseDown = false;
+      this.isDrawingWalls = false;
+      this.isErasing = false;
     });
+  }
+
+  handleCellClick(event) {
+    if (this.isRunning) return;
+
+    const cell = event.target;
+    if (!cell.classList.contains("cell")) return;
+
+    // If cell is already start or end point, or is a wall, do nothing
+    if (cell.classList.contains("start") || cell.classList.contains("end")) {
+      return;
+    }
+
+    // First click sets start point
+    if (!this.startCell) {
+      this.startCell = cell;
+      cell.classList.add("start");
+    }
+    // Second click sets end point
+    else if (!this.endCell && cell !== this.startCell) {
+      this.endCell = cell;
+      cell.classList.add("end");
+    }
+  }
+  handleWallDrawing(cell) {
+    if (
+      this.isRunning ||
+      !this.startCell ||
+      !this.endCell ||
+      cell.classList.contains("start") ||
+      cell.classList.contains("end") ||
+      cell.classList.contains("weighted")
+    ) {
+      return;
+    }
+
+    // Add or remove wall based on isErasing flag
+    if (this.isErasing) {
+      cell.classList.remove("wall");
+    } else {
+      cell.classList.add("wall");
+    }
+  }
+
+  handleEndpointDragging(target) {
+    if (
+      !target.classList.contains("cell") ||
+      target.classList.contains("wall") ||
+      target.classList.contains("weighted")
+    )
+      return;
+
+    if (this.isStartDrag && target !== this.endCell) {
+      this.startCell.classList.remove("start");
+      target.classList.add("start");
+      this.startCell = target;
+    } else if (this.isEndDrag && target !== this.startCell) {
+      this.endCell.classList.remove("end");
+      target.classList.add("end");
+      this.endCell = target;
+    }
   }
 
   handleCellClick(event) {
@@ -184,22 +248,19 @@ class PathfindingVisualizer {
     if (
       !this.startCell &&
       !cell.classList.contains("wall") &&
-      !cell.classList.contains("end")
+      !cell.classList.contains("end") &&
+      !cell.classList.contains("weighted")
     ) {
       this.startCell = cell;
       cell.classList.add("start");
     } else if (
       !this.endCell &&
       !cell.classList.contains("wall") &&
-      !cell.classList.contains("start")
+      !cell.classList.contains("start") &&
+      !cell.classList.contains("weighted")
     ) {
       this.endCell = cell;
       cell.classList.add("end");
-    } else if (
-      !cell.classList.contains("start") &&
-      !cell.classList.contains("end")
-    ) {
-      cell.classList.toggle("wall");
     }
   }
 

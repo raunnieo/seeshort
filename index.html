@@ -3,33 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pathfinding Visualizer</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Indie+Flower&display=swap"
-      rel="stylesheet"
-    />
+    <title>seeshort</title>
+    <link rel="icon" type="image/x-icon" href="image/seesort.ico" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <h1>Pathfinding Visualizer</h1>
-
+      <div class="header">
+        <div class="logo">
+          <a href="index.html"><img src="image/seesort.png" alt="Logo" /></a>
+          <h1>SEESHORT</h1>
+        </div>
+      </div>
       <div class="game-container">
         <div class="board-container">
-          <div class="grid-size-control"></div>
-
           <div id="grid"></div>
 
           <div class="board-controls">
             <div class="control-group algorithm-buttons">
+              <h3>Algorithms</h3>
+              <br />
               <button class="active" data-algorithm="dijkstra">Dijkstra</button>
-              <button data-algorithm="astar">A*</button>
+              <button data-algorithm="astar">A * Search</button>
               <button data-algorithm="bfs">BFS</button>
               <button data-algorithm="dfs">DFS</button>
             </div>
 
             <div class="control-group">
-              <label>Speed:</label>
+              <label>Speed</label>
               <input
                 type="range"
                 id="speedControl"
@@ -39,26 +40,44 @@
               />
             </div>
 
-            <button id="solveButton">Solve</button>
-            <button id="resetButton">Reset</button>
-            <button id="themeButton">Theme</button>
-            <button id="mazeButton">Generate Maze</button>
+            <div class="board-buttons">
+              <button id="mazeButton">
+                Create<br />
+                Maze
+              </button>
+              <button id="themeButton">
+                Change<br />
+                Theme
+              </button>
+              <button id="saveButton">Save</button>
+              <button id="loadButton">Load</button>
+              <button id="solveButton">Solve</button>
+              <button id="resetButton">Reset</button>
+            </div>
+
+            <div class="metrics-panel">
+              <h3>Performance Metrics</h3>
+              <p><span>Nodes Visited</span><span id="visitedCount">0</span></p>
+              <p><span>Path Length</span><span id="pathLength">0</span></p>
+              <p>
+                <span>Time Taken</span><span><span id="time">0</span> ms</span>
+              </p>
+            </div>
           </div>
         </div>
-
-        <div class="metrics-panel">
-          <h3>Performance Metrics</h3>
-          <p>Visited Nodes: <span id="visitedCount">0</span></p>
-          <p>Path Length: <span id="pathLength">0</span></p>
-          <p>Time: <span id="time">0</span> ms</p>
-        </div>
-
-        <div class="config-controls">
-          <button id="saveButton">Save</button>
-          <button id="loadButton">Load</button>
-        </div>
       </div>
+
+      <footer>
+        <span
+          style="
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS',
+              sans-serif;
+          "
+          >&copy;</span
+        >
+        <span>2024 Raunnieo . All Rights Reserved.</span>
+      </footer>
     </div>
-    <script type="module" src="main.js"></script>
   </body>
+  <script type="module" src="main.js"></script>
 </html>
