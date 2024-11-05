@@ -41,11 +41,11 @@
 } */
 
 * {
-  font-family: "Indie Flower", cursive, Indie Flower;
+  font-family: "Comic Neue", cursive, Comic Neue;
 }
 
 body {
-  font-family: "Comic Neue", "Indie Flower", cursive, Indie Flower;
+  font-family: "Comic Neue", "Indie Flower", cursive, Comic Neue;
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: all 0.3s ease;
