@@ -45,7 +45,7 @@
 }
 
 body {
-  font-family: "Comic Neue", "Indie Flower", cursive, Comic Neue;
+  font-family: "Comic Neue", cursive, Comic Neue;
   background-color: var(--bg-color);
   color: var(--text-color);
   transition: all 0.3s ease;
